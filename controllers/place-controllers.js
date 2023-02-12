@@ -1,7 +1,7 @@
 const HttpError = require("../models/http-error");
 const { v4 } = require("uuid");
 
-const DUMMY_PLACES = [
+let DUMMY_PLACES = [
   {
     id: "p1",
     title: "엠파이어 스테이트 빌딩",
@@ -59,6 +59,36 @@ const createPlace = (req, res, next) => {
   res.status(201).json({ place: createPlace });
 };
 
+const updatePlace = (req, res, next) => {
+  const pid = req.params.pid;
+  const { title, description, coordinates, address } = req.body;
+  const updatePlace = {
+    ...DUMMY_PLACES.find((p) => {
+      return p.id === pid;
+    }),
+  };
+  const placeIndex = DUMMY_PLACES.findIndex((p) => pid === p.id);
+
+  updatePlace.title = title;
+  updatePlace.description = description;
+  updatePlace.location = coordinates;
+  updatePlace.address = address;
+
+  DUMMY_PLACES[placeIndex] = updatePlace;
+  res.status(200).json({ place: updatePlace });
+};
+
+const deletePlace = (req, res, next) => {
+  const pid = req.params.pid;
+  DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== pid);
+
+  res.status(200).json({
+    message: "삭제 성공",
+  });
+};
+
 exports.getPlaceById = getPlaceById;
 exports.getPlaceByUserId = getPlaceByUserId;
 exports.createPlace = createPlace;
+exports.updatePlace = updatePlace;
+exports.deletePlace = deletePlace;
