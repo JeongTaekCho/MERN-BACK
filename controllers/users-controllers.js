@@ -1,4 +1,5 @@
 const { v4 } = require("uuid");
+const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 
 const DUMMY_USERS = [
@@ -17,6 +18,12 @@ const getUsers = (req, res, next) => {
 };
 
 const signUp = (req, res, next) => {
+  const error = validationResult(req);
+
+  if (!error.isEmpty()) {
+    throw new HttpError("빈 값이 없도록 입력해주세요.", 422);
+  }
+
   const { name, email, password } = req.body;
 
   const hasUser = DUMMY_USERS.find((u) => u.email === email);

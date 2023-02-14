@@ -78,8 +78,14 @@ const createPlace = (req, res, next) => {
 };
 
 const updatePlace = (req, res, next) => {
+  const error = validationResult(req);
+  console.log(error);
+  if (!error.isEmpty()) {
+    throw new HttpError("Invalid inputs passed, please your data.", 422);
+  }
+
   const pid = req.params.pid;
-  const { title, description, coordinates, address } = req.body;
+  const { title, description } = req.body;
   const updatePlace = {
     ...DUMMY_PLACES.find((p) => {
       return p.id === pid;
@@ -89,8 +95,6 @@ const updatePlace = (req, res, next) => {
 
   updatePlace.title = title;
   updatePlace.description = description;
-  updatePlace.location = coordinates;
-  updatePlace.address = address;
 
   DUMMY_PLACES[placeIndex] = updatePlace;
   res.status(200).json({ place: updatePlace });
@@ -99,6 +103,10 @@ const updatePlace = (req, res, next) => {
 const deletePlace = (req, res, next) => {
   const pid = req.params.pid;
   DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== pid);
+
+  if (!DUMMY_PLACES.find((p) => pid === p.id)) {
+    throw new HttpError("Could not find a place for that id", 404);
+  }
 
   res.status(200).json({
     message: "삭제 성공",
