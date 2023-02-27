@@ -52,14 +52,14 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = (req, res, next) => {
   const userId = req.params.uid;
-  const places = DUMMY_PLACES.filter((p) => {
-    return p.creator === userId;
-  });
+  const places = Place.find();
 
   if (!places || places.length === 0) {
-    return next(
-      new HttpError("could not find a places for the provided id.", 404)
+    const error = new HttpError(
+      "could not find a places for the provided id.",
+      404
     );
+    return next(error);
   }
   res.json({ places });
 };
