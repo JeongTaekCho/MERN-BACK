@@ -50,9 +50,17 @@ const getPlaceById = async (req, res, next) => {
   res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  const places = Place.find();
+
+  let places;
+
+  try {
+    places = await Place.find({ creator: userId });
+  } catch (err) {
+    const error = new HttpError("장소 가져오기에 실패 했습니다.", 500);
+    return next(error);
+  }
 
   if (!places || places.length === 0) {
     const error = new HttpError(
@@ -61,7 +69,9 @@ const getPlacesByUserId = (req, res, next) => {
     );
     return next(error);
   }
-  res.json({ places });
+  res.json({
+    places: places.map((place) => place.toObject({ getters: true })),
+  });
 };
 
 const createPlace = async (req, res, next) => {
@@ -90,6 +100,7 @@ const createPlace = async (req, res, next) => {
   });
 
   try {
+    console.log("asdads");
     await createPlace.save();
   } catch (err) {
     const error = new HttpError(err, 500);
