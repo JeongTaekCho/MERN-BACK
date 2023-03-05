@@ -110,7 +110,7 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({ place: createPlace });
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     throw new HttpError("Invalid inputs passed, please your data.", 422);
@@ -118,18 +118,27 @@ const updatePlace = (req, res, next) => {
 
   const pid = req.params.pid;
   const { title, description } = req.body;
-  const updatePlace = {
-    ...DUMMY_PLACES.find((p) => {
-      return p.id === pid;
-    }),
-  };
-  const placeIndex = DUMMY_PLACES.findIndex((p) => pid === p.id);
 
-  updatePlace.title = title;
-  updatePlace.description = description;
+  let place;
 
-  DUMMY_PLACES[placeIndex] = updatePlace;
-  res.status(200).json({ place: updatePlace });
+  try {
+    place = await Place.findById(pid);
+  } catch (err) {
+    const error = new HttpError("장소를 업데이트 할 수 없습니다.", 500);
+    return next(error);
+  }
+
+  place.title = title;
+  place.description = description;
+
+  try {
+    await place.save();
+  } catch (err) {
+    const error = new HttpError("오류가 발생했습니다.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
 const deletePlace = (req, res, next) => {
