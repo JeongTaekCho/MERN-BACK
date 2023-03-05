@@ -141,12 +141,22 @@ const updatePlace = async (req, res, next) => {
   res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const pid = req.params.pid;
-  DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== pid);
+  let place;
+  try {
+    place = await Place.findById(pid);
+    console.log(place);
+  } catch (err) {
+    const error = new HttpError("오류가 발생했습니다.", 500);
+    return next(error);
+  }
 
-  if (!DUMMY_PLACES.find((p) => pid === p.id)) {
-    throw new HttpError("Could not find a place for that id", 404);
+  try {
+    await place.remove();
+  } catch (err) {
+    const error = new HttpError("장소를 삭제할 수 없습니다.", 500);
+    return next(error);
   }
 
   res.status(200).json({
