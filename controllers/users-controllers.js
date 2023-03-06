@@ -12,10 +12,23 @@ const DUMMY_USERS = [
   },
 ];
 
-const getUsers = (req, res, next) => {
-  res.json({
-    users: DUMMY_USERS,
-  });
+const getUsers = async (req, res, next) => {
+  let users;
+
+  try {
+    users = await User.find({}, "-password");
+  } catch (err) {
+    const error = new HttpError(
+      "사용자 정보 가져오기에 실패 했습니다. 나중에 다시 시도해 주세요.",
+      500
+    );
+    return next(error);
+  }
+
+  res.json(
+    { users: users.map((user) => user.toObject({ getters: true })) },
+    200
+  );
 };
 
 const signUp = async (req, res, next) => {
