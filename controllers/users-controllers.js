@@ -39,7 +39,7 @@ const signUp = async (req, res, next) => {
     return next(error);
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser;
   try {
@@ -63,7 +63,7 @@ const signUp = async (req, res, next) => {
     image:
       "https://cdn.pixabay.com/photo/2013/01/29/00/47/google-76517__340.png",
     password,
-    places,
+    places: [],
   });
 
   try {
