@@ -66,18 +66,25 @@ const signUp = async (req, res, next) => {
   res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const identifiedUser = DUMMY_USERS.find((u) => u.email === email);
-
-  if (!identifiedUser || identifiedUser.password !== password) {
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
     const error = new HttpError(
-      "Could not identify user, credentials seem to br wrong",
-      401
+      "로그인에 실패하였습니다. 다시 시도해주세요.",
+      500
     );
     return next(error);
   }
+
+  if (!existingUser || existingUser.password !== password) {
+    const error = new HttpError("이메일 혹은 비밀번호를 확인해 주세요.", 401);
+    return next(error);
+  }
+
   res.json({ message: "Loggen in!" });
 };
 
