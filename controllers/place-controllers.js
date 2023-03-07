@@ -3,6 +3,8 @@ const { validationResult } = require("express-validator");
 const { v4 } = require("uuid");
 const getcoordsForAddress = require("../util/location");
 const Place = require("../models/place");
+const User = require("../models/user");
+const mongoose = require("mongoose");
 
 const DUMMY_PLACES = [
   {
@@ -99,8 +101,33 @@ const createPlace = async (req, res, next) => {
     creator,
   });
 
+  let user;
+
   try {
-    await createPlace.save();
+    user = await User.findById(creator);
+  } catch (err) {
+    const error = new HttpError(
+      "장소 생성에 실패하였습니다. 다시 시도해주세요.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError(
+      "ID에 해당하는 사용자를 찾을 수 없습니다.",
+      404
+    );
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    await sess.startTransaction();
+    await createPlace.save({ session: sess });
+    user.places.push(createPlace);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(err, 500);
     return next(error);
