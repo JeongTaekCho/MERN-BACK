@@ -6,31 +6,6 @@ const Place = require("../models/place");
 const User = require("../models/user");
 const mongoose = require("mongoose");
 
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "엠파이어 스테이트 빌딩",
-    description: "세상에서 가장 높은 빌딩임",
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: "20 W 34th st, new york, NY 10001",
-    creator: "u1",
-  },
-  {
-    id: "p12",
-    title: "엠파이어 스테이트 빌딩2",
-    description: "세상에서 가장 높은 빌딩임",
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: "20 W 34th st, new york, NY 10001",
-    creator: "u1",
-  },
-];
-
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
   let place;
@@ -55,7 +30,6 @@ const getPlaceById = async (req, res, next) => {
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
-  // let places;
   let userWithPlaces;
 
   try {
@@ -215,5 +189,3 @@ exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;
 exports.updatePlace = updatePlace;
 exports.deletePlace = deletePlace;
-
-//html test
