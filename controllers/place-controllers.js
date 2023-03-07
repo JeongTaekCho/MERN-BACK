@@ -175,15 +175,28 @@ const deletePlace = async (req, res, next) => {
   const pid = req.params.pid;
   let place;
   try {
-    place = await Place.findById(pid);
+    place = await Place.findById(pid).populate("creator");
     console.log(place);
   } catch (err) {
     const error = new HttpError("오류가 발생했습니다.", 500);
     return next(error);
   }
 
+  if (!place) {
+    const error = new HttpError(
+      "ID에 해당하는 장소를 찾을 수 없습니다. 다시 시도해주세요.",
+      404
+    );
+    return next(error);
+  }
+
   try {
-    await place.remove();
+    const sess = await mongoose.startSession();
+    await sess.startTransaction();
+    await place.remove({ session: sess });
+    place.creator.places.pull(place);
+    await place.creator.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError("장소를 삭제할 수 없습니다.", 500);
     return next(error);
