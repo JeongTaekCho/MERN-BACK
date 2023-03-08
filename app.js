@@ -31,7 +31,7 @@ mongoose
     "mongodb+srv://Taek:WbMLPMyFSO6kiWW2@cluster0.bwyzmgt.mongodb.net/mern?retryWrites=true&w=majority"
   )
   .then(() => {
-    app.listen(4000);
+    app.listen(5000);
   })
   .catch((err) => {
     console.log(err);
